@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>ระบบบริหารสต็อกองค์กร | แจกพนักงาน / ขาย / งานประจำปี + ระบบคืนสินค้า</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f4f9;
+      color: #0f172a;
+      padding: 20px;
+    }
+    .app-container { max-width: 1600px; margin: 0 auto; }
+    .header {
+      background: white;
+      border-radius: 28px;
+      padding: 20px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    h1 { font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, #1e4a6e, #0f2b3d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .stats-row {
+      display: flex;
+      gap: 28px;
+      background: #f8fafc;
+      padding: 8px 24px;
+      border-radius: 60px;
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-number { font-size: 1.6rem; font-weight: 800; color: #1e4a6e; }
+    .stat-label { font-size: 0.7rem; font-weight: 600; color: #4b6b8f; }
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .tab-btn.active {
+      background: #1e4a6e;
+      color: white;
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active-pane { display: block; }
+    .card {
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #eef2f8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .card-header h2 { font-size: 1.3rem; font-weight: 600; display: flex; gap: 10px; align-items: center; }
+    .card-body { padding: 20px 24px; }
+    .table-wrapper { overflow-x: auto; border-radius: 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #edf2f7; }
+    th { background: #f9fbfd; font-weight: 600; color: #1e4a6e; }
+    .search-box { display: flex; gap: 12px; background: #f8fafc; padding: 4px 16px; border-radius: 40px; align-items: center; }
+    .search-box input { border: none; background: transparent; padding: 10px 0; width: 220px; outline: none; }
+    .btn {
+      border: none;
+      padding: 8px 20px;
+      border-radius: 32px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      background: #eef2ff;
+    }
+    .btn-primary { background: #1e4a6e; color: white; }
+    .btn-primary:hover { background: #0f3b5c; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 6px 14px; font-size: 0.75rem; }
+    .badge-low { background: #ffedd5; color: #b45309; border-radius: 40px; padding: 2px 10px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+    .type-badge { padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .type-sale { background: #dbeafe; color: #1e40af; }
+    .type-staff { background: #dcfce7; color: #166534; }
+    .type-event { background: #fff3e3; color: #b45309; }
+    .type-return { background: #fee2e2; color: #991b1b; }
+    .action-icons i { margin: 0 4px; cursor: pointer; color: #6c86a3; }
+    .action-icons i:hover { color: #1e4a6e; }
+    @media (max-width: 700px) { .card-header { flex-direction: column; align-items: stretch; } }
+    .footer-note { text-align: center; margin-top: 20px; font-size: 0.7rem; color: #6c86a3; }
+    .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { flex: 1; min-width: 150px; }
+    .form-group label { font-size: 0.7rem; font-weight: 600; color: #4b6b8f; display: block; margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 28px; border: 1px solid #cbd5e1; font-size: 0.85rem; }
+    .section-title { font-weight: 600; margin: 16px 0 12px 0; color: #1e4a6e; border-left: 4px solid #1e4a6e; padding-left: 12px; }
+    .info-box { background: #f0fdf4; border-radius: 16px; padding: 12px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="header">
+    <h1><i class="fas fa-building"></i> บริหารสต็อกองค์กร</h1>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-number" id="totalItemsStat">0</div><div class="stat-label">รายการสินค้า</div></div>
+      <div class="stat"><div class="stat-number" id="totalStockStat">0</div><div class="stat-label">หน่วยคงเหลือ</div></div>
+      <div class="stat"><div class="stat-number" id="lowStockStat">0</div><div class="stat-label">สินค้าใกล้หมด (≤5)</div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="stock">📦 คลังสินค้า</button>
+    <button class="tab-btn" data-tab="movement">🔄 เบิก/แจก/ขาย</button>
+    <button class="tab-btn" data-tab="return">↩️ คืนสินค้า (เปลี่ยน/คืน)</button>
+    <button class="tab-btn" data-tab="reports">📊 รายงานรายเดือน</button>
+  </div>
+
+  <!-- TAB 1: STOCK -->
+  <div id="stockPane" class="tab-pane active-pane">
+    <div class="card">
+      <div class="card-header">
+        <h2><i class="fas fa-boxes"></i> สินค้าทั้งหมด</h2>
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" id="stockSearch" placeholder="Itemcode หรือ ชื่อสินค้า..."></div>
+      </div>
+      <div class="card-body">
+        <div class="table-wrapper">
+          <table style="min-width:700px">
+            <thead><tr><th>#</th><th>Itemcode</th><th>รายละเอียดสินค้า</th><th>หน่วย</th><th>ราคา(฿)</th><th>สต็อก</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+            <tbody id="stockTbody"></tbody>
+          </table>
+        </div>
+        <div class="footer-note"><i class="fas fa-edit"></i> คลิกดินสอเพื่อปรับจำนวนสต็อก (รับเข้า)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: MOVEMENT (เบิกจ่าย) -->
+  <div id="movementPane" class="tab-pane">
+    <div class="card">
+      <div class="card-header"><h2><i class="fas fa-people-arrows"></i> บันทึกการเบิกจ่าย</h2></div>
+      <div class="card-body">
+        <div style="background:#f8fafc; border-radius: 24px; padding: 20px; margin-bottom: 24px;">
+          <div class="form-row">
+            <div class="form-group"><label>เลือกสินค้า</label><select id="movementProductSelect"></select></div>
+            <div class="form-group"><label>จำนวน</label><input type="number" id="movementQty" min="1" value="1"></div>
+            <div class="form-group"><label>ประเภท</label><select id="movementType">
+              <option value="staff">👥 แจกพนักงาน (เบิกฟรี)</option>
+              <option value="sale">💰 ขายทั่วไป</option>
+              <option value="event">🎉 ใช้ในงานประจำปี</option>
+            </select></div>
+            <div class="form-group"><label>วันที่</label><input type="date" id="movementDate"></div>
+            <div class="form-group"><label>ชื่อผู้รับ/หมายเหตุ</label><input type="text" id="movementNote" placeholder="ชื่อพนักงาน / งานที่ใช้"></div>
+            <div class="form-group"><button id="recordMovementBtn" class="btn btn-primary"><i class="fas fa-check-circle"></i> บันทึก</button></div>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <i class="fas fa-filter"></i> <span>กรองประวัติ:</span>
+          <input type="text" id="historySearch" placeholder="ค้นหา...">
+          <input type="date" id="historyDateFrom">
+          <input type="date" id="historyDateTo">
+          <button id="resetHistoryBtn" class="btn btn-sm">รีเซ็ต</button>
+        </div>
+        <div class="table-wrapper">
+          <table style="min-width:800px">
+            <thead><tr><th>วันที่</th><th>ประเภท</th><th>Itemcode</th><th>สินค้า</th><th>จำนวน</th><th>ราคา/หน่วย</th><th>มูลค่า</th><th>หมายเหตุ/ผู้รับ</th><th>บันทึกเมื่อ</th></tr></thead>
+            <tbody id="historyTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: RETURN (คืนสินค้า) -->
+  <div id="returnPane" class="tab-pane">
+    <div class="card">
+      <div class="card-header"><h2><i class="fas fa-undo-alt"></i> ระบบคืนสินค้า (เปลี่ยน/คืน)</h2></div>
+      <div class="card-body">
+        <div style="background:#fef2f2; border-radius: 24px; padding: 20px; margin-bottom: 24px;">
+          <div class="form-row">
+            <div class="form-group"><label>เลือกสินค้าที่จะคืน</label><select id="returnProductSelect"></select></div>
+            <div class="form-group"><label>จำนวนที่คืน</label><input type="number" id="returnQty" min="1" value="1"></div>
+            <div class="form-group"><label>วันที่คืน</label><input type="date" id="returnDate"></div>
+            <div class="form-group"><label>ชื่อผู้คืน/สาเหตุ</label><input type="text" id="returnNote" placeholder="ชื่อพนักงาน / เหตุผลในการคืน"></div>
+            <div class="form-group"><button id="recordReturnBtn" class="btn btn-danger"><i class="fas fa-undo"></i> บันทึกการคืนสินค้า</button></div>
+          </div>
+          <div class="info-box">
+            <i class="fas fa-info-circle"></i> <strong>หมายเหตุ:</strong> การคืนสินค้าจะเพิ่มจำนวนสต็อกกลับเข้าไป และบันทึกประวัติการคืนแยกประเภท
+          </div>
+        </div>
+        <div class="section-title"><i class="fas fa-history"></i> ประวัติการคืนสินค้า</div>
+        <div class="filter-bar">
+          <input type="text" id="returnHistorySearch" placeholder="ค้นหาประวัติการคืน...">
+          <button id="resetReturnHistoryBtn" class="btn btn-sm">รีเซ็ต</button>
+        </div>
+        <div class="table-wrapper">
+          <table style="min-width:700px">
+            <thead><tr><th>วันที่คืน</th><th>Itemcode</th><th>สินค้า</th><th>จำนวนที่คืน</th><th>มูลค่าตอนแจก</th><th>ผู้คืน/สาเหตุ</th><th>บันทึกเมื่อ</th></tr></thead>
+            <tbody id="returnHistoryTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: REPORT -->
+  <div id="reportsPane" class="tab-pane">
+    <div class="card">
+      <div class="card-header"><h2><i class="fas fa-chart-line"></i> สรุปรายเดือน</h2>
+        <div><input type="month" id="monthReportPicker" value="2025-02"></div>
+      </div>
+      <div class="card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>ประเภทการเคลื่อนไหว</th><th>จำนวนหน่วย</th><th>มูลค่ารวม (บาท)</th></tr></thead>
+            <tbody id="summaryTbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:24px; background:#f0f9ff; border-radius: 24px; padding: 16px;">
+          <h4><i class="fas fa-chart-simple"></i> สรุปภาพรวมเดือนนี้</h4>
+          <p><strong>💰 ยอดรวมมูลค่าที่จ่าย/แจก:</strong> <span id="totalMonthValue">0</span> บาท</p>
+          <p><strong>📦 จำนวนหน่วยที่เคลื่อนไหว:</strong> <span id="totalMonthUnits">0</span> ชิ้น</p>
+          <p><strong>↩️ ยอดรวมมูลค่าที่คืน:</strong> <span id="totalReturnValue">0</span> บาท</p>
+          <p><strong>📊 สุทธิ (จ่ายสุทธิ):</strong> <span id="netMonthValue">0</span> บาท</p>
+        </div>
+        <div style="margin-top:20px;"><button id="exportMonthCSV" class="btn"><i class="fas fa-download"></i> ส่งออกรายงาน (CSV)</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note"><i class="fas fa-history"></i> บันทึกอัตโนมัติ | รองรับแจกพนักงาน, ขาย, ใช้ในงาน, คืนสินค้า | ตรวจสอบสต็อกอัตโนมัติ</div>
+</div>
+
+<script>
+  // ข้อมูลสินค้าทั้ง 207 รายการ
+  const rawProducts = [["1","60700005","GROUND CLOTHS(เสื้อกราวด์แขนสั้น)","SET",""],["2","60700052","Hat (หมวกตาข่าย) (ขาว)","EA",150],["3","60700055","Hat (หมวกตาข่าย) (ชมพู)","EA",150],["4","60700054","Hat (หมวกตาข่าย) (เหลือง)","EA",150],["5","60700053","Hat (หมวกตาข่าย) (แดง)","EA",150],["6","60700048","Hat (หมวกมีหู) (ขาว)","EA",150],["7","60700051","Hat (หมวกมีหู) (ฟ้า)","EA",150],["8","60700050","Hat (หมวกมีหู) (เหลือง)","EA",150],["9","60700049","Hat (หมวกมีหู) (แดง)","EA",150],["10","60700128","Hat หมวก Line Baby (สีขาว)","EA",""],["11","60700135","Hat หมวก Line Baby (สีเหลือง)","EA",""],["12","60700136","Hat หมวก Line Baby (สีแดง)","EA",""],["13","60700144","Hat หมวกญี่ปุ่นมีปีกสีฟ้าปักชมพู","EA",150],["14","60700145","Hat หมวกญี่ปุ่นมีปีกสีฟ้าปักฟ้า","EA",150],["15","60700143","Hat หมวกญี่ปุ่นมีปีกสีฟ้าปักเหลือง","EA",150],["16","60700142","Hat หมวกญี่ปุ่นมีปีกสีฟ้าปักแดง","EA",150],["17","60700146","Hat หมวกนินจาสีขาว","EA",150],["18","60700149","Hat หมวกนินจาสีขาวแถบชมพู","EA",150],["19","60700150","Hat หมวกนินจาสีขาวแถบเขียว","EA",150],["20","60700147","Hat หมวกนินจาสีขาวแถบเหลือง","EA",150],["21","60700148","Hat หมวกนินจาสีขาวแถบแดง","EA",150],["22","60700157","Hat หมวกนินจาสีฟ้าแถบชมพู","EA",150],["23","60700154","Hat หมวกนินจาสีฟ้าแถบฟ้า","EA",150],["24","60700155","Hat หมวกนินจาสีฟ้าแถบเหลือง","EA",150],["25","60700156","Hat หมวกนินจาสีฟ้าแถบแดง","EA",150],["26","60700171","Hat หมวกนินจาสีเขียว","EA",150],["27","60700019","T- Shirt (ผู้บริหาร) (Size : 36)","EA",145],["28","60700020","T- Shirt (ผู้บริหาร) (Size : 38)","EA",145],["29","60700023","T- Shirt (ผู้บริหาร) (Size : L)","EA",145],["30","60700022","T- Shirt (ผู้บริหาร) (Size : M)","EA",145],["31","60700021","T- Shirt (ผู้บริหาร) (Size : S)","EA",145],["32","60700024","T- Shirt (ผู้บริหาร) (Size : XL)","EA",145],["33","60700207","T- Shirt (ผู้บริหาร) (Size : XXL)","EA",145],["34","60700201","T- Shirt (ผู้บริหาร) (Size : XXXL)","EA",145],["35","60700025","T- Shirt (เขียว) (Size : 36)","EA",145],["36","60700026","T- Shirt (เขียว) (Size : 38)","EA",145],["37","60700244","T- Shirt (เขียว) (Size : 4XL)","EA",145],["38","60700029","T- Shirt (เขียว) (Size : L)","EA",145],["39","60700028","T- Shirt (เขียว) (Size : M)","EA",145],["40","60700027","T- Shirt (เขียว) (Size : S)","EA",145],["41","60700030","T- Shirt (เขียว) (Size : XL)","EA",145],["42","60700031","T- Shirt (เขียว) (Size : XXL)","EA",145],["43","60700209","T- Shirt (เขียว) (Size : XXXL)","EA",145],["44","60700032","T- Shirt (แดง) (Size : 36)","EA",145],["45","60700033","T- Shirt (แดง) (Size : 38)","EA",145],["46","60700245","T- Shirt (แดง) (Size : 4XL)","EA",145],["47","60700036","T- Shirt (แดง) (Size : L)","EA",145],["48","60700035","T- Shirt (แดง) (Size : M)","EA",145],["49","60700034","T- Shirt (แดง) (Size : S)","EA",145],["50","60700037","T- Shirt (แดง) (Size : XL)","EA",145],["51","60700038","T- Shirt (แดง) (Size : XXL)","EA",145],["52","60700208","T- Shirt (แดง) (Size : XXXL)","EA",145]];
+  
+  const extra = [
+    [53,"60700039","กางเกง (Size : 26)","EA",245],[54,"60700040","กางเกง (Size : 28)","EA",245],[55,"60700041","กางเกง (Size : 30)","EA",245],[56,"60700042","กางเกง (Size : 32)","EA",245],[57,"60700043","กางเกง (Size : 34)","EA",245],[58,"60700044","กางเกง (Size : 36)","EA",245],[59,"60700045","กางเกง (Size : 38)","EA",245],[60,"60700046","กางเกง (Size : 40)","EA",245],[61,"60700047","กางเกง (Size : 42)","EA",245],[62,"60700243","กางเกง (Size : 50)","EA",245],[63,"60700227","ชุดกราวน์แขนยาว (สีเขียว) size:52","EA",245],[64,"60700225","ชุดกราวน์แขนยาว (สีเขียว) size:XL","EA",245],[65,"60700226","ชุดกราวน์แขนยาว (สีเขียว) size:XXL","EA",245],[66,"60700072","ชุดคลุมท้อง","EA",420],[67,"60700206","ชุดคลุมท้อง Special Size","EA",420],[68,"60700093","ชุดปั่นขนมแบบสวมหัว สีเขียว","EA",""],[69,"60700084","ชุดปั่นขนม(Power) (สีเทา)","EA",380],[70,"60700094","ชุดปั่นขนมแบบสวม สีน้ำตาล","EA",""],[71,"60700081","ถุงกรองฝุ่น (กลาง)","EA",120],[72,"60700099","ถุงกรองฝุ่น (เล็ก)","EA",80],[73,"60700159","ถุงกรองฝุ่น (ใหญ่)","EA",230],[74,"60700074","ถุงผ้าใยแก้วไซด์เล็ก","EA",""],[75,"60700092","ถุงผ้าใยแก้วไซด์ใหญ่","EA",""],[76,"60700085","ถุงสวมปอกแขน","EA",85],[77,"60700073","ถุงสวมฟองน้ำ","EA",""],[78,"60700115","ผ้ากรองซอส","EA",""],[79,"60700071","ผ้ากันเปื้อน (น้ำตาล)","EA",""],[80,"60700070","ผ้ากันเปื้อน (ฟ้าไม่มีกระเป๋า)","EA",100],[81,"60700076","ผ้ากันเปื้อน (กรมท่าไม่มีกระเป๋า)","EA",100],[82,"60700138","ผ้ากันเปื้อน (ชมพู:มีกระเป๋า)","EA",100],[83,"60700141","ผ้ากันเปื้อน (น้ำตาลไม่มีกระเป๋า)","EA",100],[84,"60700069","ผ้ากันเปื้อน (ฟ้ามีกระเป๋า)","EA",""],[85,"60700139","ผ้ากันเปื้อน (ม่วงไม่มีกระเป๋า)","EA",100],[86,"60700140","ผ้ากันเปื้อน (เขียวไม่มีกระเป๋า)","EA",100],[87,"60700114","ผ้ากันเปื้อน (เหลืองไม่มีกระเป๋า)","EA",""],[88,"60700127","ผ้าคลุมรถเข็น (เขียว)","EA",""],[89,"60700162","ผ้าคลุมรถเข็น (เขียวอ่อน)","EA",""],[90,"60700134","ผ้าคลุมรถเข็น (เหลือง)","EA",""],[91,"60700086","ผ้าคลุมแม่พิมพ์ MOLD","EA",""],[92,"60700165","ผ้าตาข่ายกุ๊นขาว","EA",""],[93,"60700167","ผ้าตาข่ายกุ๊นน้ำเงิน","EA",""],[94,"60700166","ผ้าตาข่ายกุ๊นเหลือง","EA",""],[95,"60700170","ผ้าตาข่ายกุ๊นแดง","EA",""],[96,"60700158","ผ้าปล่อยแป้งกลาง","EA",150],[97,"60700080","ผ้าปล่อยแป้งเล็ก","EA",150],[98,"60700153","ผ้าปล่อยแป้งใหญ่สีเทา","EA",200],[99,"60700079","ผ้าปล่อยแป้งใหญ่เขียว","EA",""],[100,"60700078","ผ้าปล่อยแป้งใหญ่เหลือง","EA",""],[101,"60700116","ผ้าปิดจมูกขาว","EA",""],[102,"60700118","ผ้าปิดจมูกฟ้า","EA",""],[103,"60700117","ผ้าปิดจมูกครีม","EA",""],[104,"60710018","ผ้าปิดปากมีตัวกรอง","EA",""],[105,"60700137","ผ้าหุ้มแปรง","EA",""],[106,"60700113","ผ้าเช็ดตะแกรงขาว","EA",23],[107,"60700110","ผ้าเช็ดตะแกรงน้ำตาล","EA",23],[108,"60700111","ผ้าเช็ดตะแกรงเขียว","EA",23],[109,"60700112","ผ้าเช็ดตะแกรงเหลือง","EA",23],[110,"60700228","ผ้าเช็ดหม้อปั่น Powder (เขียว)","EA",""],[111,"60700098","ผ้าเช็ดหม้อปั่น Powder ผืนใหญ่","EA",""],[112,"60700216","ผ้าเช็ดหม้อปั่น Powder ผืนใหญ่เขียว","EA",""],[113,"60700011","ผ้าเช็ดเครื่องจักรกรม","EA",17],[114,"60700009","ผ้าเช็ดเครื่องจักรขาว","EA",17],[115,"60700237","ผ้าเช็ดเครื่องจักรครีม","EA",17],[116,"60700075","ผ้าเช็ดเครื่องจักรน้ำตาล","EA",17],[117,"60700100","ผ้าเช็ดเครื่องจักรเขียว","EA",17],[118,"60700010","ผ้าเช็ดเครื่องจักรเหลือง","EA",17],[119,"60700169","ผ้าเช็ดเครื่องจักรตาข่ายกรม","EA",""],[120,"60700164","ผ้าเช็ดเครื่องจักรตาข่ายขาว","EA",""],[121,"60700168","ผ้าเช็ดเครื่องจักรตาข่ายเหลือง","EA",""],[122,"60700056","รองเท้า (Size 36)","PR",115],[123,"60700057","รองเท้า (37)","PR",115],[124,"60700058","รองเท้า (38)","PR",115],[125,"60700059","รองเท้า (39)","PR",115],[126,"60700060","รองเท้า (40)","PR",115],[127,"60700061","รองเท้า (41)","PR",115],[128,"60700062","รองเท้า (42)","PR",115],[129,"60700063","รองเท้า (43)","PR",115],[130,"60700119","รองเท้าสีกรม 36","PR",115],[131,"60700120","รองเท้าสีกรม 37","PR",115],[132,"60700121","รองเท้าสีกรม 38","PR",115],[133,"60700122","รองเท้าสีกรม 39","PR",115],[134,"60700123","รองเท้าสีกรม 40","PR",115],[135,"60700124","รองเท้าสีกรม 41","PR",115],[136,"60700125","รองเท้าสีกรม 42","PR",115],[137,"60700126","รองเท้าสีกรม 43","PR",115],[138,"60700231","รองเท้าสีกากี 38","PR",115],[139,"60700232","รองเท้าสีกากี 39","PR",115],[140,"60700233","รองเท้าสีกากี 40","PR",115],[141,"60700234","รองเท้าสีกากี 41","PR",115],[142,"60700236","รองเท้าสีกากี 43","PR",115],[143,"60700077","หมวกแก๊ปขาว","EA",""],[144,"60700198","เสื้อ Baby RC Gray L","EA",310],[145,"60700199","เสื้อ Baby RC Gray XL","EA",310],[146,"60700193","เสื้อ Baby RC Green L","EA",310],[147,"60700194","เสื้อ Baby RC Green XL","EA",310],[148,"60700188","เสื้อ Baby RC Pink L","EA",310],[149,"60700187","เสื้อ Baby RC Pink M","EA",310],[150,"60700186","เสื้อ Baby RC Pink S","EA",310],[151,"60700189","เสื้อ Baby RC Pink XL","EA",310],[152,"60700217","เสื้อ Jecket น้ำเงิน 3XL ปัก","EA",380],[153,"60700218","เสื้อ Pack Baby 2XL","EA",310],[154,"60700131","เสื้อ Pack Baby L","EA",310],[155,"60700130","เสื้อ Pack Baby M","EA",310],[156,"60700129","เสื้อ Pack Baby S","EA",310],[157,"60700132","เสื้อ Pack Baby XL","EA",310],[158,"60700210","เสื้อ Shop ขาว 3XL","EA",195],[159,"60700088","เสื้อJecket น้ำเงิน L","EA",""],[160,"60700102","เสื้อJecket น้ำเงิน L ปักโลโก้","EA",380],[161,"60700105","เสื้อJecket น้ำเงิน L ปักชื่อ","EA",""],[162,"60700087","เสื้อJecket น้ำเงิน M","EA",""],[163,"60700101","เสื้อJecket น้ำเงิน M ปักโลโก้","EA",380],[164,"60700104","เสื้อJecket น้ำเงิน M ปักชื่อ","EA",""],[165,"60700089","เสื้อJecket น้ำเงิน XL","EA",""],[166,"60700106","เสื้อJecket น้ำเงิน XL ปักชื่อ","EA",""],[167,"60700103","เสื้อJecket น้ำเงิน XL ปักโลโก้","EA",380],[168,"60700107","เสื้อJecket น้ำเงิน XXL ปักโลโก้","EA",380],[169,"60700016","เสื้อShop L","EA",195],[170,"60700015","เสื้อShop M","EA",195],[171,"60700014","เสื้อShop S","EA",195],[172,"60700013","เสื้อShop SS","EA",195],[173,"60700012","เสื้อShop SSS","EA",195],[174,"60700017","เสื้อShop XL","EA",195],[175,"60700018","เสื้อShop XXL","EA",195],[176,"60700083","เสื้อShop แขนยาวน้ำเงิน L","EA",""],[177,"60700240","เสื้อกราวน์เทา SS Powder L","EA",380],[178,"60700241","เสื้อกราวน์เทา SS Powder XL","EA",380],[179,"60700185","เสื้อกราวน์แดงเลือดหมู 2XL","EA",245],[180,"60700183","เสื้อกราวน์แดงเลือดหมู L","EA",245],[181,"60700182","เสื้อกราวน์แดงเลือดหมู M","EA",245],[182,"60700181","เสื้อกราวน์แดงเลือดหมู S","EA",245],[183,"60700184","เสื้อกราวน์แดงเลือดหมู XL","EA",245],[184,"60700068","เสื้อกราวน์ขาวแขนยาว 52","EA",245],[185,"60700065","เสื้อกราวน์ขาวแขนยาว L","EA",245],[186,"60700064","เสื้อกราวน์ขาวแขนยาว S","EA",245],[187,"60700066","เสื้อกราวน์ขาวแขนยาว XL","EA",245],[188,"60700067","เสื้อกราวน์ขาวแขนยาว XXL","EA",245],[189,"60700096","เสื้อกราวน์ขาวแขนยาว M","EA",245],[190,"60700163","เสื้อกราวน์ม่วงแขนยาว","EA",""],[191,"60700091","เสื้อกราวน์น้ำตาลแขนยาว","EA",""],[192,"60700090","เสื้อกราวน์น้ำเงิน L","EA",245],[193,"60700108","เสื้อกราวน์น้ำเงิน M","EA",245],[194,"60700109","เสื้อกราวน์น้ำเงิน XL","EA",245],[195,"60700095","เสื้อกราวน์ฟ้า","EA",""],[196,"60700152","เสื้อกราวน์เหลือง","EA",""],[197,"60700213","เสื้อคนสวน Polo น้ำเงิน L","EA",""],[198,"60700151","เสื้อคลุมแซคเขียว","EA",""],[199,"60700161","เสื้อคอกลมฟ้าแขนยาว","EA",245],[200,"60700160","เสื้อคอกลมฟ้าแขนสั้น","EA",220],[201,"60700172","เสื้อยืดคอกลมขาว","EA",65],[202,"60700097","เสื้อแขนยาวขาว","EA",""],[203,"60700180","เสื้อแผนก FD 2XL","EA",""],[204,"60700178","เสื้อแผนก FD L","EA",""],[205,"60700177","เสื้อแผนก FD M","EA",""],[206,"60700176","เสื้อแผนก FD S","EA",""],[207,"60700179","เสื้อแผนก FD XL","EA",""]
+  ];
+  
+  const allProducts = [...rawProducts, ...extra];
+  let products = [];
+  allProducts.forEach(p => {
+    let price = (p[4] !== "" && !isNaN(parseFloat(p[4]))) ? parseFloat(p[4]) : 0;
+    products.push({
+      id: p[1],
+      itemcode: p[1],
+      description: p[2],
+      unit: p[3],
+      price: price,
+      quantity: Math.floor(Math.random() * 60) + 8
+    });
+  });
+  
+  let movements = [];
+  let returns = []; // { date, itemcode, description, quantity, valueWhenIssued, reason, timestamp }
+  
+  function loadData() {
+    let storedProd = localStorage.getItem("corp_stock_products_v2");
+    if(storedProd) products = JSON.parse(storedProd);
+    let storedMov = localStorage.getItem("corp_stock_movements_v2");
+    if(storedMov) movements = JSON.parse(storedMov);
+    let storedRet = localStorage.getItem("corp_stock_returns_v2");
+    if(storedRet) returns = JSON.parse(storedRet);
+  }
+  
+  function saveData() { 
+    localStorage.setItem("corp_stock_products_v2", JSON.stringify(products)); 
+    localStorage.setItem("corp_stock_movements_v2", JSON.stringify(movements));
+    localStorage.setItem("corp_stock_returns_v2", JSON.stringify(returns));
+  }
+  
+  function renderStockTable(filter=""){
+    let filtered = products.filter(p=>p.itemcode.includes(filter) || p.description.toLowerCase().includes(filter.toLowerCase()));
+    let tbody = document.getElementById("stockTbody");
+    if(!tbody) return;
+    if(filtered.length===0){ tbody.innerHTML="<tr><td colspan='8'>ไม่มีสินค้า</td></tr>"; return; }
+    let html="";
+    filtered.forEach((p,idx)=>{
+      let low = p.quantity<=5;
+      html+=`<tr><td>${idx+1}</td><td>${p.itemcode}</td><td>${p.description}</td><td>${p.unit}</td><td>${p.price.toFixed(2)}</td><td>${p.quantity}</td>
+      <td>${low ? '<span class="badge-low">ใกล้หมด</span>' : 'ปกติ'}</td>
+      <td class="action-icons"><i class="fas fa-edit edit-stock" data-code="${p.itemcode}"></i></td></tr>`;
+    });
+    tbody.innerHTML=html;
+    document.querySelectorAll(".edit-stock").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        let code=btn.getAttribute("data-code");
+        let newQty=prompt("ปรับจำนวนสต็อก (รับเข้า/ปรับปรุง):", products.find(p=>p.itemcode===code).quantity);
+        if(newQty!==null && !isNaN(parseInt(newQty))){ 
+          products.find(p=>p.itemcode===code).quantity=parseInt(newQty); 
+          saveData(); 
+          renderStockTable(document.getElementById("stockSearch")?.value||""); 
+          updateStats(); 
+        }
+      });
+    });
+  }
+  
+  function updateStats(){
+    document.getElementById("totalItemsStat").innerText=products.length;
+    document.getElementById("totalStockStat").innerText=products.reduce((s,p)=>s+p.quantity,0);
+    document.getElementById("lowStockStat").innerText=products.filter(p=>p.quantity<=5).length;
+  }
+  
+  function renderMovementsHistory(filterText="", fromDate="", toDate=""){
+    let filtered = [...movements];
+    if(filterText) filtered = filtered.filter(m=>m.itemcode.includes(filterText) || m.description.toLowerCase().includes(filterText.toLowerCase()) || (m.note||"").toLowerCase().includes(filterText.toLowerCase()));
+    if(fromDate) filtered = filtered.filter(m=>m.date>=fromDate);
+    if(toDate) filtered = filtered.filter(m=>m.date<=toDate);
+    filtered.sort((a,b)=>b.date.localeCompare(a.date));
+    let tbody=document.getElementById("historyTbody");
+    if(!tbody) return;
+    if(filtered.length===0){ tbody.innerHTML="<tr><td colspan='9'>ไม่มีประวัติ</td></tr>"; return; }
+    let html="";
+    filtered.forEach(m=>{
+      let typeText={staff:"👥 แจกพนักงาน", sale:"💰 ขาย", event:"🎉 ใช้ในงาน"}[m.type];
+      let typeClass={staff:"type-staff", sale:"type-sale", event:"type-event"}[m.type];
+      html+=`<tr><td>${m.date}</td><td><span class="type-badge ${typeClass}">${typeText}</span></td><td>${m.itemcode}</td><td>${m.description}</td><td>${m.quantity}</td>
+      <td>${m.unitPrice.toFixed(2)}</td><td>${m.totalValue.toFixed(2)}</td><td>${m.note||'-'}</td><td>${m.timestamp||''}</td></tr>`;
+    });
+    tbody.innerHTML=html;
+  }
+  
+  function renderReturnHistory(filterText=""){
+    let filtered = [...returns];
+    if(filterText) filtered = filtered.filter(r=>r.itemcode.includes(filterText) || r.description.toLowerCase().includes(filterText.toLowerCase()) || (r.reason||"").toLowerCase().includes(filterText.toLowerCase()));
+    filtered.sort((a,b)=>b.date.localeCompare(a.date));
+    let tbody=document.getElementById("returnHistoryTbody");
+    if(!tbody) return;
+    if(filtered.length===0){ tbody.innerHTML="<tr><td colspan='7'>ไม่มีประวัติการคืน</td></tr>"; return; }
+    let html="";
+    filtered.forEach(r=>{
+      html+=`<tr><td>${r.date}</td><td>${r.itemcode}</td><td>${r.description}</td><td>${r.quantity}</td>
+      <td>${r.valueWhenIssued.toFixed(2)}</td><td>${r.reason||'-'}</td><td>${r.timestamp||''}</td></tr>`;
+    });
+    tbody.innerHTML=html;
+  }
+  
+  function updateProductSelects(){
+    let select1 = document.getElementById("movementProductSelect");
+    let select2 = document.getElementById("returnProductSelect");
+    let options = '<option value="">--เลือกสินค้า--</option>' + products.map(p=>`<option value="${p.itemcode}" data-price="${p.price}">${p.itemcode} - ${p.description} (คงเหลือ ${p.quantity})</option>`).join("");
+    if(select1) select1.innerHTML = options;
+    if(select2) select2.innerHTML = options;
+  }
+  
+  function recordMovement(){
+    let code=document.getElementById("movementProductSelect").value;
+    if(!code){ alert("เลือกสินค้า"); return; }
+    let qty=parseInt(document.getElementById("movementQty").value);
+    if(isNaN(qty)||qty<=0){ alert("จำนวนต้องมากกว่า0"); return; }
+    let type=document.getElementById("movementType").value;
+    let date=document.getElementById("movementDate").value;
+    if(!date) date=new Date().toISOString().slice(0,10);
+    let note=document.getElementById("movementNote").value.trim();
+    let product=products.find(p=>p.itemcode===code);
+    if(!product){ alert("ไม่พบสินค้า"); return; }
+    if(product.quantity < qty){ alert(`สต็อกไม่พอ! คงเหลือ ${product.quantity}`); return; }
+    let totalVal = product.price * qty;
+    product.quantity -= qty;
+    let movementRecord={
+      date, type, itemcode:product.itemcode, description:product.description, quantity:qty,
+      unitPrice:product.price, totalValue:totalVal, note:note || (type==="staff"?"แจกพนักงาน":type==="event"?"ใช้ในงาน":"ขาย"), 
+      timestamp:new Date().toLocaleString('th-TH')
+    };
+    movements.push(movementRecord);
+    saveData();
+    updateProductSelects();
+    renderStockTable(document.getElementById("stockSearch")?.value||"");
+    renderMovementsHistory(document.getElementById("historySearch").value, document.getElementById("historyDateFrom").value, document.getElementById("historyDateTo").value);
+    updateStats();
+    document.getElementById("movementQty").value="1";
+    document.getElementById("movementNote").value="";
+    alert(`บันทึกสำเร็จ: ${type==="staff"?"แจกพนักงาน":type==="sale"?"ขาย":"ใช้ในงาน"} ${qty} ชิ้น มูลค่า ${totalVal.toFixed(2)} บาท`);
+  }
+  
+  function recordReturn(){
+    let code=document.getElementById("returnProductSelect").value;
+    if(!code){ alert("เลือกสินค้าที่จะคืน"); return; }
+    let qty=parseInt(document.getElementById("returnQty").value);
+    if(isNaN(qty)||qty<=0){ alert("จำนวนต้องมากกว่า0"); return; }
+    let date=document.getElementById("returnDate").value;
+    if(!date) date=new Date().toISOString().slice(0,10);
+    let reason=document.getElementById("returnNote").value.trim() || "คืนสินค้า";
+    let product=products.find(p=>p.itemcode===code);
+    if(!product){ alert("ไม่พบสินค้า"); return; }
+    let valueWhenIssued = product.price * qty;
+    product.quantity += qty;
+    let returnRecord={
+      date, itemcode:product.itemcode, description:product.description, quantity:qty,
+      valueWhenIssued:valueWhenIssued, reason:reason, timestamp:new Date().toLocaleString('th-TH')
+    };
+    returns.push(returnRecord);
+    saveData();
+    updateProductSelects();
+    renderStockTable(document.getElementById("stockSearch")?.value||"");
+    renderReturnHistory(document.getElementById("returnHistorySearch")?.value || "");
+    updateStats();
+    document.getElementById("returnQty").value="1";
+    document.getElementById("returnNote").value="";
+    alert(`บันทึกการคืนสำเร็จ: เพิ่มสต็อก ${qty} ชิ้น มูลค่า ${valueWhenIssued.toFixed(2)} บาท`);
+  }
+  
+  function renderMonthlyReport(){
+    let month=document.getElementById("monthReportPicker").value;
+    if(!month) return;
+    let [year,monthNum]=month.split("-");
+    let filteredMovements=movements.filter(m=>m.date.startsWith(`${year}-${monthNum}`));
+    let filteredReturns=returns.filter(r=>r.date.startsWith(`${year}-${monthNum}`));
+    let summary={staff:{qty:0,val:0}, sale:{qty:0,val:0}, event:{qty:0,val:0}};
+    filteredMovements.forEach(m=>{ summary[m.type].qty+=m.quantity; summary[m.type].val+=m.totalValue; });
+    let totalReturnValue = filteredReturns.reduce((sum,r)=>sum+r.valueWhenIssued,0);
+    let tbody=document.getElementById("summaryTbody");
+    tbody.innerHTML=`<tr><td>👥 แจกพนักงาน</td><td>${summary.staff.qty}</td><td>${summary.staff.val.toFixed(2)}</td></tr>
+                      <tr><td>💰 ขายทั่วไป</td><td>${summary.sale.qty}</td><td>${summary.sale.val.toFixed(2)}</td></tr>
+                      <tr><td>🎉 ใช้ในงาน/งานประจำปี</td><td>${summary.event.qty}</td><td>${summary.event.val.toFixed(2)}</td></tr>`;
+    let totalVal=summary.staff.val+summary.sale.val+summary.event.val;
+    let totalUnits=summary.staff.qty+summary.sale.qty+summary.event.qty;
+    document.getElementById("totalMonthValue").innerText=totalVal.toFixed(2);
+    document.getElementById("totalMonthUnits").innerText=totalUnits;
+    document.getElementById("totalReturnValue").innerText=totalReturnValue.toFixed(2);
+    document.getElementById("netMonthValue").innerText=(totalVal - totalReturnValue).toFixed(2);
+  }
+  
+  function exportMonthCSV(){
+    let month=document.getElementById("monthReportPicker").value;
+    let [year,monthNum]=month.split("-");
+    let filteredMovements=movements.filter(m=>m.date.startsWith(`${year}-${monthNum}`));
+    let filteredReturns=returns.filter(r=>r.date.startsWith(`${year}-${monthNum}`));
+    let csv=[["รายงานเดือน", month],[""],["รายการเบิกจ่าย","","","","","",""],["วันที่","ประเภท","Itemcode","สินค้า","จำนวน","ราคาต่อหน่วย","มูลค่า","หมายเหตุ"]];
+    filteredMovements.forEach(m=>{ csv.push([m.date, m.type, m.itemcode, m.description, m.quantity, m.unitPrice, m.totalValue, m.note||""]); });
+    csv.push([""],["รายการคืนสินค้า","","","","",""],["วันที่คืน","Itemcode","สินค้า","จำนวน","มูลค่าตอนแจก","สาเหตุ"]);
+    filteredReturns.forEach(r=>{ csv.push([r.date, r.itemcode, r.description, r.quantity, r.valueWhenIssued, r.reason]); });
+    let content=csv.map(row=>row.join(",")).join("\n");
+    let blob=new Blob(["\uFEFF"+content],{type:"text/csv"});
+    let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`report_${month}.csv`; a.click();
+  }
+  
+  // Event bindings
+  document.getElementById("recordMovementBtn")?.addEventListener("click",recordMovement);
+  document.getElementById("recordReturnBtn")?.addEventListener("click",recordReturn);
+  document.getElementById("exportMonthCSV")?.addEventListener("click",exportMonthCSV);
+  document.getElementById("stockSearch")?.addEventListener("input",e=>renderStockTable(e.target.value));
+  document.getElementById("historySearch")?.addEventListener("input",()=>renderMovementsHistory(document.getElementById("historySearch").value,document.getElementById("historyDateFrom").value,document.getElementById("historyDateTo").value));
+  document.getElementById("historyDateFrom")?.addEventListener("change",()=>renderMovementsHistory(document.getElementById("historySearch").value,document.getElementById("historyDateFrom").value,document.getElementById("historyDateTo").value));
+  document.getElementById("historyDateTo")?.addEventListener("change",()=>renderMovementsHistory(document.getElementById("historySearch").value,document.getElementById("historyDateFrom").value,document.getElementById("historyDateTo").value));
+  document.getElementById("resetHistoryBtn")?.addEventListener("click",()=>{ document.getElementById("historySearch").value=""; document.getElementById("historyDateFrom").value=""; document.getElementById("historyDateTo").value=""; renderMovementsHistory("","",""); });
+  document.getElementById("resetReturnHistoryBtn")?.addEventListener("click",()=>{ document.getElementById("returnHistorySearch").value=""; renderReturnHistory(""); });
+  document.getElementById("returnHistorySearch")?.addEventListener("input",e=>renderReturnHistory(e.target.value));
+  document.getElementById("monthReportPicker")?.addEventListener("change",renderMonthlyReport);
+  
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active-pane"));
+      document.getElementById(btn.dataset.tab+"Pane").classList.add("active-pane");
+      if(btn.dataset.tab==="movement"){ updateProductSelects(); renderMovementsHistory("","",""); }
+      if(btn.dataset.tab==="return"){ updateProductSelects(); renderReturnHistory(""); }
+      if(btn.dataset.tab==="reports") renderMonthlyReport();
+      if(btn.dataset.tab==="stock") renderStockTable(document.getElementById("stockSearch")?.value);
+    });
+  });
+  
+  loadData();
+  renderStockTable("");
+  updateStats();
+  updateProductSelects();
+  renderMovementsHistory("","","");
+  renderReturnHistory("");
+  renderMonthlyReport();
+  document.getElementById("movementDate").value = new Date().toISOString().slice(0,10);
+  document.getElementById("returnDate").value = new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>

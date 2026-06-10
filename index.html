@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>สต๊อกยูนิฟอร์ม</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<div class="app-container">
+  <!-- content here -->
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyAgtG_2RgpTClw7EWwXiLk1AiBO5pe4k2s",
+    authDomain: "stock-system-acaae.firebaseapp.com",
+    databaseURL: "https://stock-system-acaae-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "stock-system-acaae",
+    storageBucket: "stock-system-acaae.firebasestorage.app",
+    messagingSenderId: "923611474965",
+    appId: "1:923611474965:web:f8fc7d9e016f7b9e5b321c"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+  
+  window.db = database;
+  window.firebaseRef = ref;
+  window.firebaseSet = set;
+  window.firebaseGet = get;
+</script>
+
+<script src="js/data/products.js"></script>
+<script src="js/data/storage.js"></script>
+<script src="js/utils/helpers.js"></script>
+<script src="js/components/stock.js"></script>
+<script src="js/components/movement.js"></script>
+<script src="js/components/return.js"></script>
+<script src="js/components/receive.js"></script>
+<script src="js/components/report.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
