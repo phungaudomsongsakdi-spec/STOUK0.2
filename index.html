@@ -6,7 +6,7 @@
     <title>ระบบบริหารจัดการสต๊อกสินค้า</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="./styles/main.css">
 </head>
 <body>
 <div class="app-container">
@@ -25,6 +25,9 @@
                 <div class="stat-number" id="lowStockStat">0</div>
                 <div class="stat-label">⚠️ ควรสั่งซื้อ</div>
             </div>
+            <button id="forceRefreshBtn" style="background:#1e4a6e; color:white; border:none; border-radius:40px; padding:8px 16px; cursor:pointer;">
+                <i class="fas fa-sync-alt"></i> โหลดข้อมูลล่าสุด
+            </button>
         </div>
     </div>
 
@@ -48,7 +51,7 @@
     </div>
 </div>
 
-<!-- ✅ Firebase SDK - โหลดก่อนทุกอย่าง -->
+<!-- ✅ Firebase SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -63,17 +66,15 @@
         appId: "1:923611474965:web:f8fc7d9e016f7b9e5b321c"
     };
     
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
     
-    // ทำให้ตัวแปรพร้อมใช้งานทั่วโลก
     window.db = database;
     window.firebaseRef = ref;
     window.firebaseSet = set;
     window.firebaseGet = get;
     
-    console.log("✅ Firebase connected successfully");
+    console.log("✅ Firebase connected");
 </script>
 
 <!-- JavaScript Files -->

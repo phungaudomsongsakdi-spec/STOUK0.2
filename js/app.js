@@ -1,30 +1,28 @@
 // js/app.js
 let App = {
   currentTab: "stock",
-  syncInterval: null, // เพิ่มตัวแปรสำหรับ interval
+  syncInterval: null,
   
   async init() {
     await AppStorage.loadData();
     this.loadTabContent();
     this.bindEvents();
     this.onTabChange();
-    this.startRealtimeSync(); // ✅ เพิ่ม: เริ่ม Real-time sync
+    this.startRealtimeSync();
   },
   
-  // ✅ เพิ่มฟังก์ชันนี้: ฟังการเปลี่ยนแปลงแบบ Real-time
   startRealtimeSync() {
     const db = window.db;
     const dbRef = window.firebaseRef;
     const getData = window.firebaseGet;
     
     if (!db || !dbRef || !getData) {
-      console.log("⚠️ Firebase not available, cannot start realtime sync");
+      console.log("⚠️ Firebase not available");
       return;
     }
     
-    console.log("🔄 Starting realtime sync...");
+    console.log("🔄 Starting realtime sync (every 3 seconds)...");
     
-    // ตรวจสอบการเปลี่ยนแปลงทุก 2 วินาที
     this.syncInterval = setInterval(async () => {
       try {
         const snapshot = await getData(dbRef(db, 'stock-data'));
@@ -38,32 +36,36 @@ let App = {
             receives: AppStorage.receives
           };
           
-          // ตรวจสอบว่าข้อมูลเปลี่ยนหรือไม่
           if (JSON.stringify(newData) !== JSON.stringify(currentData)) {
-            console.log("🔄 Real-time update detected! Syncing...");
+            console.log("🔄 Real-time update detected!");
             
-            // อัปเดตข้อมูล
             AppStorage.products = newData.products || [];
             AppStorage.movements = newData.movements || [];
             AppStorage.returns = newData.returns || [];
             AppStorage.receives = newData.receives || [];
-            
-            // บันทึก localStorage
             AppStorage.saveToLocalStorage();
-            
-            // รีเฟรชหน้าจอ
             this.refreshCurrentTab();
             
             console.log("✅ Synced with Firebase");
           }
         }
       } catch(error) {
-        console.error("Error syncing with Firebase:", error);
+        console.error("Sync error:", error);
       }
-    }, 2000); // ทุก 2 วินาที
+    }, 3000);
   },
   
-  // ✅ เพิ่มฟังก์ชันนี้: รีเฟรชแท็บปัจจุบัน
+  async forceRefresh() {
+    console.log("🔄 Manual force refresh...");
+    const success = await AppStorage.forceReloadFromFirebase();
+    if (success) {
+      this.refreshCurrentTab();
+      alert("✅ โหลดข้อมูลล่าสุดจาก Firebase สำเร็จ!");
+    } else {
+      alert("❌ ไม่สามารถโหลดข้อมูลจาก Firebase ได้");
+    }
+  },
+  
   refreshCurrentTab() {
     switch(this.currentTab) {
       case "stock":
@@ -100,7 +102,6 @@ let App = {
     if(StockComponent.updateReorderCount) StockComponent.updateReorderCount();
   },
   
-  // ส่วนที่เหลือเหมือนเดิม...
   loadTabContent() {
     document.getElementById("stockPane").innerHTML = StockComponent.render();
     document.getElementById("movementPane").innerHTML = MovementComponent.render();
@@ -120,9 +121,15 @@ let App = {
         this.onTabChange();
       });
     });
+    
+    // ปุ่มรีเฟรช
+    const refreshBtn = document.getElementById("forceRefreshBtn");
+    if(refreshBtn) {
+      refreshBtn.addEventListener("click", () => this.forceRefresh());
+    }
   },
   
-  onTabChange() {
+  async onTabChange() {
     Helpers.updateStats();
     Helpers.updateProductSelects();
     
@@ -289,7 +296,6 @@ let App = {
           let newExportBtn = exportHistoryExcelBtn.cloneNode(true);
           exportHistoryExcelBtn.parentNode.replaceChild(newExportBtn, exportHistoryExcelBtn);
           newExportBtn.addEventListener("click", () => {
-            console.log("Click Export Movement");
             MovementComponent.exportToExcel();
           });
         }
@@ -463,7 +469,6 @@ let App = {
           let newExportBtn = exportReturnHistoryExcelBtn.cloneNode(true);
           exportReturnHistoryExcelBtn.parentNode.replaceChild(newExportBtn, exportReturnHistoryExcelBtn);
           newExportBtn.addEventListener("click", () => {
-            console.log("Click Export Return");
             ReturnComponent.exportToExcel();
           });
         }
@@ -592,7 +597,6 @@ let App = {
           let newExportBtn = exportReceiveHistoryExcelBtn.cloneNode(true);
           exportReceiveHistoryExcelBtn.parentNode.replaceChild(newExportBtn, exportReceiveHistoryExcelBtn);
           newExportBtn.addEventListener("click", () => {
-            console.log("Click Export Receive");
             ReceiveComponent.exportToExcel();
           });
         }
@@ -619,5 +623,4 @@ let App = {
   }
 };
 
-// เริ่มต้นแอปเมื่อโหลดหน้าเสร็จ
 document.addEventListener("DOMContentLoaded", () => App.init());

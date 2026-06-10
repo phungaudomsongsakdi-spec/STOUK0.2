@@ -17,36 +17,32 @@ window.AppStorage = window.AppStorage || {
         const snapshot = await getData(dbRef(db, 'stock-data'));
         
         if (snapshot.exists()) {
-          // ✅ มีข้อมูลใน Firebase แล้ว → โหลดมาใช้
           const data = snapshot.val();
+          console.log("📦 Data from Firebase:", data);
+          
           this.products = data.products || [];
           this.movements = data.movements || [];
           this.returns = data.returns || [];
           this.receives = data.receives || [];
+          
           console.log(`✅ Loaded ${this.products.length} products from Firebase`);
           
-          // อัปเดต localStorage เป็น cache
           this.saveToLocalStorage();
         } else {
-          // ❌ ไม่มีข้อมูลใน Firebase → สร้างจาก products.js แล้วอัปโหลด
-          console.log("⚠️ No data in Firebase, creating initial data from products.js...");
-          this.initProducts(); // สร้างสินค้าจาก ProductsData
-          await this.saveData(); // อัปโหลดไป Firebase
-          console.log(`✅ Created and uploaded ${this.products.length} products to Firebase`);
+          console.log("⚠️ No data in Firebase, creating initial data...");
+          this.initProducts();
+          await this.saveData();
         }
       } else {
-        // Firebase ไม่พร้อม → ใช้ localStorage แทน
         console.log("❌ Firebase not available, using localStorage");
         this.loadFromLocalStorage();
         
-        // ถ้า localStorage ก็ไม่มี → สร้างใหม่
         if (this.products.length === 0) {
           this.initProducts();
           this.saveToLocalStorage();
         }
       }
       
-      // อัปเดตข้อมูลเก่าให้มี field ใหม่
       this.migrateOldMovements();
       
     } catch(error) {
@@ -93,12 +89,10 @@ window.AppStorage = window.AppStorage || {
     }
   },
   
-  // ========== บันทึกข้อมูลลง Firebase + localStorage ==========
+  // ========== บันทึกข้อมูลลง Firebase ==========
   async saveData() {
-    // บันทึก localStorage เสมอ
     this.saveToLocalStorage();
     
-    // บันทึก Firebase
     try {
       const db = window.db;
       const setData = window.firebaseSet;
@@ -112,18 +106,40 @@ window.AppStorage = window.AppStorage || {
           receives: this.receives,
           lastUpdated: new Date().toISOString()
         });
-        console.log("☁️ Data saved to Firebase successfully");
+        console.log("☁️ Data saved to Firebase");
       }
     } catch(error) {
       console.error("❌ Error saving to Firebase:", error);
     }
   },
   
-  // ========== สร้างสินค้าจาก ProductsData (products.js) ==========
+  // ========== รีเฟรชข้อมูลจาก Firebase ==========
+  async forceReloadFromFirebase() {
+    console.log("🔄 Force reloading from Firebase...");
+    const db = window.db;
+    const dbRef = window.firebaseRef;
+    const getData = window.firebaseGet;
+    
+    if(db && dbRef && getData) {
+      const snapshot = await getData(dbRef(db, 'stock-data'));
+      if(snapshot.exists()) {
+        const data = snapshot.val();
+        this.products = data.products || [];
+        this.movements = data.movements || [];
+        this.returns = data.returns || [];
+        this.receives = data.receives || [];
+        this.saveToLocalStorage();
+        console.log(`✅ Reloaded ${this.products.length} products from Firebase`);
+        return true;
+      }
+    }
+    return false;
+  },
+  
+  // ========== สร้างสินค้าจาก ProductsData ==========
   initProducts() {
     console.log("📦 Creating initial products from ProductsData...");
     
-    // รวมสินค้าทั้งหมด
     const allProducts = [...ProductsData.rawProducts, ...ProductsData.extraProducts];
     
     this.products = [];
@@ -135,12 +151,12 @@ window.AppStorage = window.AppStorage || {
         description: p[2],
         unit: p[3],
         price: price,
-        quantity: Math.floor(Math.random() * 60) + 8, // สุ่มสต็อกเริ่มต้น 8-68 ชิ้น
+        quantity: Math.floor(Math.random() * 60) + 8,
         reorderPoint: 10
       });
     });
     
-    console.log(`✅ Created ${this.products.length} products from products.js`);
+    console.log(`✅ Created ${this.products.length} products`);
   },
   
   // ========== อัปเดตข้อมูลเก่า ==========
@@ -157,7 +173,6 @@ window.AppStorage = window.AppStorage || {
       newhire: "🆕 พนักงานใหม่"
     };
     
-    // อัปเดต movements
     for(let i = 0; i < this.movements.length; i++) {
       let m = this.movements[i];
       
@@ -193,7 +208,6 @@ window.AppStorage = window.AppStorage || {
       }
     }
     
-    // อัปเดต returns
     for(let i = 0; i < this.returns.length; i++) {
       let r = this.returns[i];
       if(r.issuer === undefined) {
@@ -204,30 +218,7 @@ window.AppStorage = window.AppStorage || {
     
     if(updated) {
       this.saveData();
-      console.log("✅ Migrated old data (added issuer, department, typeLabel)");
+      console.log("✅ Migrated old data");
     }
-  },
-  
-  // ========== ฟังก์ชันช่วยเหลือ ==========
-  clearAllData() {
-    if(confirm("⚠️ คุณต้องการลบข้อมูลทั้งหมดใช่หรือไม่? การกระทำนี้ไม่สามารถกู้คืนได้")) {
-      this.products = [];
-      this.movements = [];
-      this.returns = [];
-      this.receives = [];
-      this.saveData();
-      location.reload();
-    }
-  },
-  
-  getStats() {
-    return {
-      totalProducts: this.products.length,
-      totalStock: this.products.reduce((sum, p) => sum + p.quantity, 0),
-      lowStock: this.products.filter(p => p.quantity <= (p.reorderPoint || 10)).length,
-      totalMovements: this.movements.length,
-      totalReturns: this.returns.length,
-      totalReceives: this.receives.length
-    };
   }
 };
