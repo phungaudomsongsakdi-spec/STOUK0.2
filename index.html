@@ -1,42 +1,54 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>สต๊อกยูนิฟอร์ม</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="styles/main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ระบบบริหารจัดการสต๊อกสินค้า</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
 <div class="app-container">
-  <!-- content here -->
+    <div class="header">
+        <h1><i class="fas fa-boxes"></i> ระบบบริหารจัดการสต๊อกสินค้า</h1>
+        <div class="stats-row">
+            <div class="stat">
+                <div class="stat-number" id="totalItemsStat">0</div>
+                <div class="stat-label">รายการสินค้า</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="totalStockStat">0</div>
+                <div class="stat-label">หน่วยคงเหลือ</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="lowStockStat">0</div>
+                <div class="stat-label">⚠️ ควรสั่งซื้อ</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="stock">📦 คลังสินค้า</button>
+        <button class="tab-btn" data-tab="movement">🔄 เบิก/แจกสินค้า</button>
+        <button class="tab-btn" data-tab="return">↩️ คืน/เปลี่ยนสินค้า</button>
+        <button class="tab-btn" data-tab="receive">🚚 รับสินค้าเข้า</button>
+        <button class="tab-btn" data-tab="reports">📊 รายงานสรุป</button>
+    </div>
+
+    <div id="stockPane" class="tab-pane active-pane"></div>
+    <div id="movementPane" class="tab-pane"></div>
+    <div id="returnPane" class="tab-pane"></div>
+    <div id="receivePane" class="tab-pane"></div>
+    <div id="reportsPane" class="tab-pane"></div>
+
+    <div class="footer-note">
+        <i class="fas fa-save"></i> บันทึกข้อมูลอัตโนมัติ | 
+        <i class="fas fa-database"></i> ข้อมูลถูกเก็บใน Local Storage
+    </div>
 </div>
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyAgtG_2RgpTClw7EWwXiLk1AiBO5pe4k2s",
-    authDomain: "stock-system-acaae.firebaseapp.com",
-    databaseURL: "https://stock-system-acaae-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "stock-system-acaae",
-    storageBucket: "stock-system-acaae.firebasestorage.app",
-    messagingSenderId: "923611474965",
-    appId: "1:923611474965:web:f8fc7d9e016f7b9e5b321c"
-  };
-  
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-  
-  window.db = database;
-  window.firebaseRef = ref;
-  window.firebaseSet = set;
-  window.firebaseGet = get;
-</script>
-
+<!-- JavaScript Files -->
 <script src="js/data/products.js"></script>
 <script src="js/data/storage.js"></script>
 <script src="js/utils/helpers.js"></script>
