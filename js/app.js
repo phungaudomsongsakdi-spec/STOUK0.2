@@ -1,17 +1,106 @@
+// js/app.js
 let App = {
   currentTab: "stock",
+  syncInterval: null, // เพิ่มตัวแปรสำหรับ interval
   
-  init() {
-    AppStorage.loadData();
-    if(AppStorage.products.length === 0) {
-      AppStorage.initProducts();
-    }
-    
+  async init() {
+    await AppStorage.loadData();
     this.loadTabContent();
     this.bindEvents();
     this.onTabChange();
+    this.startRealtimeSync(); // ✅ เพิ่ม: เริ่ม Real-time sync
   },
   
+  // ✅ เพิ่มฟังก์ชันนี้: ฟังการเปลี่ยนแปลงแบบ Real-time
+  startRealtimeSync() {
+    const db = window.db;
+    const dbRef = window.firebaseRef;
+    const getData = window.firebaseGet;
+    
+    if (!db || !dbRef || !getData) {
+      console.log("⚠️ Firebase not available, cannot start realtime sync");
+      return;
+    }
+    
+    console.log("🔄 Starting realtime sync...");
+    
+    // ตรวจสอบการเปลี่ยนแปลงทุก 2 วินาที
+    this.syncInterval = setInterval(async () => {
+      try {
+        const snapshot = await getData(dbRef(db, 'stock-data'));
+        
+        if (snapshot.exists()) {
+          const newData = snapshot.val();
+          const currentData = {
+            products: AppStorage.products,
+            movements: AppStorage.movements,
+            returns: AppStorage.returns,
+            receives: AppStorage.receives
+          };
+          
+          // ตรวจสอบว่าข้อมูลเปลี่ยนหรือไม่
+          if (JSON.stringify(newData) !== JSON.stringify(currentData)) {
+            console.log("🔄 Real-time update detected! Syncing...");
+            
+            // อัปเดตข้อมูล
+            AppStorage.products = newData.products || [];
+            AppStorage.movements = newData.movements || [];
+            AppStorage.returns = newData.returns || [];
+            AppStorage.receives = newData.receives || [];
+            
+            // บันทึก localStorage
+            AppStorage.saveToLocalStorage();
+            
+            // รีเฟรชหน้าจอ
+            this.refreshCurrentTab();
+            
+            console.log("✅ Synced with Firebase");
+          }
+        }
+      } catch(error) {
+        console.error("Error syncing with Firebase:", error);
+      }
+    }, 2000); // ทุก 2 วินาที
+  },
+  
+  // ✅ เพิ่มฟังก์ชันนี้: รีเฟรชแท็บปัจจุบัน
+  refreshCurrentTab() {
+    switch(this.currentTab) {
+      case "stock":
+        StockComponent.renderStockTable(document.getElementById("stockSearch")?.value || "");
+        break;
+      case "movement":
+        MovementComponent.renderMovementsHistory(
+          document.getElementById("historySearch")?.value || "",
+          document.getElementById("historyTypeFilter")?.value || "",
+          document.getElementById("historyDeptInput")?.value || "",
+          document.getElementById("historyDateFrom")?.value || "",
+          document.getElementById("historyDateTo")?.value || ""
+        );
+        break;
+      case "return":
+        ReturnComponent.renderReturnHistory(
+          document.getElementById("returnHistorySearch")?.value || "",
+          document.getElementById("historyExchangeTypeFilter")?.value || ""
+        );
+        break;
+      case "receive":
+        ReceiveComponent.renderReceiveHistory(
+          document.getElementById("receiveHistorySearch")?.value || "",
+          document.getElementById("receiveHistorySupplierFilter")?.value || "",
+          document.getElementById("receiveHistoryDateFrom")?.value || "",
+          document.getElementById("receiveHistoryDateTo")?.value || ""
+        );
+        break;
+      case "reports":
+        ReportComponent.renderMonthlyReport();
+        break;
+    }
+    Helpers.updateStats();
+    if(StockComponent.updateReorderCount) StockComponent.updateReorderCount();
+  },
+  
+  // ส่วนที่เหลือเหมือนเดิม...
   loadTabContent() {
     document.getElementById("stockPane").innerHTML = StockComponent.render();
     document.getElementById("movementPane").innerHTML = MovementComponent.render();
@@ -399,7 +488,6 @@ let App = {
           }
         });
         
-        // ========== จัดการ dropdown ผู้จัดส่ง ==========
         let supplierSelect = document.getElementById("receiveSupplierSelect");
         let supplierOther = document.getElementById("receiveSupplierOther");
         if(supplierSelect) {
@@ -426,7 +514,6 @@ let App = {
           newRecordReceiveBtn.addEventListener("click", () => ReceiveComponent.recordReceive());
         }
         
-        // ========== กรองประวัติ ==========
         let receiveHistorySearch = document.getElementById("receiveHistorySearch");
         if(receiveHistorySearch) {
           let newReceiveHistorySearch = receiveHistorySearch.cloneNode(true);
@@ -441,7 +528,6 @@ let App = {
           });
         }
         
-        // กรองตามผู้จัดส่ง
         let receiveHistorySupplierFilter = document.getElementById("receiveHistorySupplierFilter");
         if(receiveHistorySupplierFilter) {
           let newSupplierFilter = receiveHistorySupplierFilter.cloneNode(true);
