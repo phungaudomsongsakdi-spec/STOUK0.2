@@ -44,9 +44,37 @@
 
     <div class="footer-note">
         <i class="fas fa-save"></i> บันทึกข้อมูลอัตโนมัติ | 
-        <i class="fas fa-database"></i> ข้อมูลถูกเก็บใน Local Storage
+        <i class="fas fa-database"></i> ข้อมูลถูกเก็บใน Firebase + Local Storage
     </div>
 </div>
+
+<!-- ✅ Firebase SDK - โหลดก่อนทุกอย่าง -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyAgtG_2RgpTClw7EWwXiLk1AiBO5pe4k2s",
+        authDomain: "stock-system-acaae.firebaseapp.com",
+        databaseURL: "https://stock-system-acaae-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "stock-system-acaae",
+        storageBucket: "stock-system-acaae.firebasestorage.app",
+        messagingSenderId: "923611474965",
+        appId: "1:923611474965:web:f8fc7d9e016f7b9e5b321c"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    
+    // ทำให้ตัวแปรพร้อมใช้งานทั่วโลก
+    window.db = database;
+    window.firebaseRef = ref;
+    window.firebaseSet = set;
+    window.firebaseGet = get;
+    
+    console.log("✅ Firebase connected successfully");
+</script>
 
 <!-- JavaScript Files -->
 <script src="js/data/products.js"></script>
