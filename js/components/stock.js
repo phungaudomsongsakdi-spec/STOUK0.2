@@ -18,7 +18,7 @@ const StockComponent = {
                   <th>ราคา(฿)</th>
                   <th>สต็อก</th>
                   <th>สถานะ</th>
-                  <th>📦 รีไทม์สั่งซื้อ</th>
+                  <th>📦เซฟตี้สต๊อก</th>
                   <th>จัดการ</th>
                 </tr>
               </thead>
