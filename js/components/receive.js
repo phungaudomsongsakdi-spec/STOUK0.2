@@ -49,7 +49,7 @@ const ReceiveComponent = {
             <i class="fas fa-filter"></i> <span>กรองประวัติ:</span>
             <input type="text" id="receiveHistorySearch" placeholder="ค้นหาทั้งหมด...">
             <select id="receiveHistorySupplierFilter" style="padding: 6px 12px; border-radius: 20px; border: 1px solid #cbd5e1;">
-              <option value="">📌ผู้จัดส่งทั้งหมด</option>
+              <option value="">📌 ผู้จัดส่งทั้งหมด</option>
               <option value="บริษัท ครอกโคไดล์ เอ็นเตอร์ไพรส์ จำกัด (ชุด uniform)">🏢 บริษัท ครอกโคไดล์ ฯ (ชุด uniform)</option>
               <option value="บริษัท กสิพันธารัต จำกัด (รองเท้า)">👟 บริษัท กสิพันธารัต ฯ (รองเท้า)</option>
               <option value="OTHER">✏️ อื่นๆ</option>
@@ -66,19 +66,19 @@ const ReceiveComponent = {
             <table style="min-width:1000px; border-collapse: collapse; width:100%;">
               <thead>
                 <tr style="border: 1px solid #ddd;">
-                  <th style="width:10%; text-align:center; border:1px solid #ddd; padding:10px;">วันที่</th>
-                  <th style="width:12%; text-align:center; border:1px solid #ddd; padding:10px;">Itemcode</th>
-                  <th style="width:25%; text-align:center; border:1px solid #ddd; padding:10px;">สินค้า</th>
-                  <th style="width:7%; text-align:center; border:1px solid #ddd; padding:10px;">จำนวน</th>
-                  <th style="width:8%; text-align:center; border:1px solid #ddd; padding:10px;">มูลค่า</th>
-                  <th style="width:20%; text-align:center; border:1px solid #ddd; padding:10px;">ผู้จัดส่ง</th>
-                  <th style="width:15%; text-align:center; border:1px solid #ddd; padding:10px;">ผู้รับ</th>
-                  <th style="width:15%; text-align:center; border:1px solid #ddd; padding:10px;">หมายเหตุ</th>
-                  <th style="width:15%; text-align:center; border:1px solid #ddd; padding:10px;">บันทึกเมื่อ</th>
+                  <th style="width:10%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">วันที่</th>
+                  <th style="width:12%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">Itemcode</th>
+                  <th style="width:22%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">สินค้า</th>
+                  <th style="width:6%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">จำนวน</th>
+                  <th style="width:8%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">มูลค่า</th>
+                  <th style="width:18%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">ผู้จัดส่ง</th>
+                  <th style="width:12%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">ผู้รับ</th>
+                  <th style="width:12%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">หมายเหตุ</th>
+                  <th style="width:15%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">บันทึกเมื่อ</th>
                 </tr>
               </thead>
               <tbody id="receiveHistoryTbody"></tbody>
-            <table>
+            </table>
           </div>
         </div>
       </div>
@@ -289,7 +289,6 @@ const ReceiveComponent = {
     // กรองตามผู้จัดส่ง
     if(supplierFilter) {
       if(supplierFilter === "OTHER") {
-        // กรองผู้จัดส่งที่ไม่ได้เป็น 2 บริษัทหลัก (คือที่พิมพ์เอง)
         filtered = filtered.filter(r => 
           r.supplier !== "บริษัท ครอกโคไดล์ เอ็นเตอร์ไพรส์ จำกัด (ชุด uniform)" && 
           r.supplier !== "บริษัท กสิพันธารัต จำกัด (รองเท้า)"
@@ -317,15 +316,15 @@ const ReceiveComponent = {
       let formattedTimestamp = this.formatTimestamp(r.timestamp);
       html += `
         <tr style="border: 1px solid #ddd;">
-          <td style="text-align:center; border:1px solid #ddd; padding:10px;">${formattedDate}</td>
-          <td style="text-align:center; border:1px solid #ddd; padding:10px;">${r.itemcode}</td>
-          <td style="text-align:left; border:1px solid #ddd; padding:10px;">${r.description}</td>
-          <td style="text-align:center; border:1px solid #ddd; padding:10px;">${r.quantity}</td>
-          <td style="text-align:right; border:1px solid #ddd; padding:10px;">${(r.totalValue || 0).toFixed(2)}</td>
-          <td style="text-align:left; border:1px solid #ddd; padding:10px;">${r.supplier || '-'}</td>
-          <td style="text-align:left; border:1px solid #ddd; padding:10px;">${r.receiver || '-'}</td>
-          <td style="text-align:left; border:1px solid #ddd; padding:10px;">${r.note || '-'}</td>
-          <td style="text-align:center; border:1px solid #ddd; padding:10px;">${formattedTimestamp}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">${formattedDate}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">${r.itemcode}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: normal;">${r.description}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">${r.quantity}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">${(r.totalValue || 0).toFixed(2)}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: normal;">${r.supplier || '-'}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: normal;">${r.receiver || '-'}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: normal;">${r.note || '-'}</td>
+          <td style="text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">${formattedTimestamp}</td>
         </tr>
       `;
     });
@@ -351,7 +350,6 @@ const ReceiveComponent = {
         );
       }
       
-      // กรองตามผู้จัดส่ง
       if(supplierFilter) {
         if(supplierFilter === "OTHER") {
           filtered = filtered.filter(r => 
@@ -367,29 +365,93 @@ const ReceiveComponent = {
       if(toDate) filtered = filtered.filter(r => r.date <= toDate);
       filtered.sort((a, b) => b.date.localeCompare(a.date));
       
+      let totalQty = 0;
+      let totalValue = 0;
+      filtered.forEach(r => {
+        totalQty += r.quantity;
+        totalValue += (r.totalValue || 0);
+      });
+      
       let htmlContent = `
         <html>
         <head>
           <meta charset="UTF-8">
           <title>รายงานการรับสินค้าเข้า</title>
           <style>
-            body { font-family: 'Sukhumvit Set', 'Tahoma', 'Angsana New', sans-serif; margin: 20px; }
-            h2 { color: #1e4a6e; margin-bottom: 10px; }
-            .report-date { margin-bottom: 20px; color: #666; font-size: 12px; }
-            table { border-collapse: collapse; width: 100%; font-size: 13px; }
-            th { background-color: #1e4a6e; color: white; padding: 12px 8px; text-align: center; border: 1px solid #ddd; font-weight: bold; }
-            td { padding: 10px 8px; border: 1px solid #ddd; }
+            @page {
+              size: A4;
+              margin: 0.5cm;
+            }
+            body { 
+              font-family: 'Sukhumvit Set', 'Tahoma', 'Angsana New', sans-serif; 
+              margin: 0;
+              padding: 10px;
+            }
+            h2 { 
+              color: #1e4a6e; 
+              margin-bottom: 8px; 
+              font-size: 16px;
+            }
+            .report-date { 
+              margin-bottom: 15px; 
+              color: #666; 
+              font-size: 10px; 
+            }
+            table { 
+              border-collapse: collapse; 
+              width: 100%; 
+              font-size: 10px;
+            }
+            th {
+              background-color: #1e4a6e;
+              color: white;
+              padding: 6px 4px;
+              text-align: center;
+              border: 1px solid #ddd;
+              font-weight: bold;
+              white-space: nowrap;
+            }
+            td {
+              padding: 5px 4px;
+              border: 1px solid #ddd;
+              text-align: center;
+              white-space: nowrap;
+            }
             tr:nth-child(even) { background-color: #f9f9f9; }
-            .footer { margin-top: 20px; text-align: right; font-size: 11px; color: #999; }
-            .total-row { background-color: #eef2ff; font-weight: bold; }
+            .footer { 
+              margin-top: 15px; 
+              text-align: right; 
+              font-size: 9px; 
+              color: #999; 
+            }
+            .total-row {
+              background-color: #eef2ff;
+              font-weight: bold;
+            }
           </style>
         </head>
         <body>
           <h2>รายงานการรับสินค้าเข้า</h2>
-          <div class="report-date">สร้างเมื่อ: ${new Date().toLocaleString('th-TH')}${filterText ? ` | ค้นหา: ${filterText}` : ''}${supplierFilter ? ` | ผู้จัดส่ง: ${supplierFilter === "OTHER" ? "อื่นๆ" : supplierFilter}` : ''}</div>
+          <div class="report-date">
+            สร้างเมื่อ: ${new Date().toLocaleString('th-TH')}
+            ${filterText ? ` | ค้นหา: ${filterText}` : ''}
+            ${supplierFilter ? ` | ผู้จัดส่ง: ${supplierFilter === "OTHER" ? "อื่นๆ" : supplierFilter}` : ''}
+            ${fromDate ? ` | วันที่เริ่มต้น: ${this.formatDateToThai(fromDate)}` : ''}
+            ${toDate ? ` | วันที่สิ้นสุด: ${this.formatDateToThai(toDate)}` : ''}
+          </div>
           <table>
             <thead>
-              <tr><th style="width:10%">วันที่</th><th style="width:12%">Itemcode</th><th style="width:25%">สินค้า</th><th style="width:7%">จำนวน</th><th style="width:8%">มูลค่า</th><th style="width:20%">ผู้จัดส่ง</th><th style="width:15%">ผู้รับ</th><th style="width:15%">หมายเหตุ</th><th style="width:15%">บันทึกเมื่อ</th></tr>
+              <tr>
+                <th style="width:10%">วันที่</th>
+                <th style="width:12%">Itemcode</th>
+                <th style="width:22%">สินค้า</th>
+                <th style="width:6%">จำนวน</th>
+                <th style="width:8%">มูลค่า</th>
+                <th style="width:18%">ผู้จัดส่ง</th>
+                <th style="width:12%">ผู้รับ</th>
+                <th style="width:12%">หมายเหตุ</th>
+                <th style="width:15%">บันทึกเมื่อ</th>
+              </tr>
             </thead>
             <tbody>
       `;
@@ -397,13 +459,35 @@ const ReceiveComponent = {
       filtered.forEach(r => {
         let formattedDate = this.formatDateToThai(r.date);
         let formattedTimestamp = this.formatTimestamp(r.timestamp);
-        htmlContent += `<tr><td style="text-align:center">${formattedDate}</td><td style="text-align:center">${r.itemcode}</td><td style="text-align:left">${r.description}</td><td style="text-align:center">${r.quantity}</td><td style="text-align:right">${(r.totalValue || 0).toFixed(2)}</td><td style="text-align:left">${r.supplier || '-'}</td><td style="text-align:left">${r.receiver || '-'}</td><td style="text-align:left">${r.note || '-'}</td><td style="text-align:center">${formattedTimestamp}</td></tr>`;
+        htmlContent += `
+              <tr>
+                <td style="text-align:center">${formattedDate}</td>
+                <td style="text-align:center">${r.itemcode}</td>
+                <td style="text-align:center">${r.description}</td>
+                <td style="text-align:center">${r.quantity}</td>
+                <td style="text-align:center">${(r.totalValue || 0).toFixed(2)}</td>
+                <td style="text-align:center">${r.supplier || '-'}</td>
+                <td style="text-align:center">${r.receiver || '-'}</td>
+                <td style="text-align:center">${r.note || '-'}</td>
+                <td style="text-align:center">${formattedTimestamp}</td>
+              </tr>
+        `;
       });
       
       htmlContent += `
             </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="3" style="text-align:right;"><strong>รวมทั้งสิ้น</strong></td>
+                <td style="text-align:center;"><strong>${totalQty}</strong></td>
+                <td style="text-align:center;"><strong>${totalValue.toFixed(2)}</strong></td>
+                <td colspan="4"></td>
+              </tr>
+            </tfoot>
           </table>
-          <div class="footer">สร้างโดยระบบบริหารสต็อกองค์กร | จำนวนรายการ: ${filtered.length} รายการ</div>
+          <div class="footer">
+            สร้างโดยระบบบริหารสต็อกองค์กร | จำนวนรายการ: ${filtered.length} รายการ
+          </div>
         </body>
         </html>
       `;
@@ -420,7 +504,7 @@ const ReceiveComponent = {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      alert("✅ ส่งออก Excel สำเร็จ!");
+      alert("✅ ส่งออก Excel สำเร็จ! ไฟล์อยู่ในโฟลเดอร์ Downloads");
     } catch(e) { 
       console.error("Export Error:", e);
       alert("เกิดข้อผิดพลาด: " + e.message); 

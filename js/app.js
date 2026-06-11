@@ -1,105 +1,15 @@
-// js/app.js
 let App = {
   currentTab: "stock",
-  syncInterval: null,
   
-  async init() {
-    await AppStorage.loadData();
+  init() {
+    AppStorage.loadData();
+    if(AppStorage.products.length === 0) {
+      AppStorage.initProducts();
+    }
+    
     this.loadTabContent();
     this.bindEvents();
     this.onTabChange();
-    this.startRealtimeSync();
-  },
-  
-  startRealtimeSync() {
-    const db = window.db;
-    const dbRef = window.firebaseRef;
-    const getData = window.firebaseGet;
-    
-    if (!db || !dbRef || !getData) {
-      console.log("⚠️ Firebase not available");
-      return;
-    }
-    
-    console.log("🔄 Starting realtime sync (every 3 seconds)...");
-    
-    this.syncInterval = setInterval(async () => {
-      try {
-        const snapshot = await getData(dbRef(db, 'stock-data'));
-        
-        if (snapshot.exists()) {
-          const newData = snapshot.val();
-          const currentData = {
-            products: AppStorage.products,
-            movements: AppStorage.movements,
-            returns: AppStorage.returns,
-            receives: AppStorage.receives
-          };
-          
-          if (JSON.stringify(newData) !== JSON.stringify(currentData)) {
-            console.log("🔄 Real-time update detected!");
-            
-            AppStorage.products = newData.products || [];
-            AppStorage.movements = newData.movements || [];
-            AppStorage.returns = newData.returns || [];
-            AppStorage.receives = newData.receives || [];
-            AppStorage.saveToLocalStorage();
-            this.refreshCurrentTab();
-            
-            console.log("✅ Synced with Firebase");
-          }
-        }
-      } catch(error) {
-        console.error("Sync error:", error);
-      }
-    }, 3000);
-  },
-  
-  async forceRefresh() {
-    console.log("🔄 Manual force refresh...");
-    const success = await AppStorage.forceReloadFromFirebase();
-    if (success) {
-      this.refreshCurrentTab();
-      alert("✅ โหลดข้อมูลล่าสุดจาก Firebase สำเร็จ!");
-    } else {
-      alert("❌ ไม่สามารถโหลดข้อมูลจาก Firebase ได้");
-    }
-  },
-  
-  refreshCurrentTab() {
-    switch(this.currentTab) {
-      case "stock":
-        StockComponent.renderStockTable(document.getElementById("stockSearch")?.value || "");
-        break;
-      case "movement":
-        MovementComponent.renderMovementsHistory(
-          document.getElementById("historySearch")?.value || "",
-          document.getElementById("historyTypeFilter")?.value || "",
-          document.getElementById("historyDeptInput")?.value || "",
-          document.getElementById("historyDateFrom")?.value || "",
-          document.getElementById("historyDateTo")?.value || ""
-        );
-        break;
-      case "return":
-        ReturnComponent.renderReturnHistory(
-          document.getElementById("returnHistorySearch")?.value || "",
-          document.getElementById("historyExchangeTypeFilter")?.value || ""
-        );
-        break;
-      case "receive":
-        ReceiveComponent.renderReceiveHistory(
-          document.getElementById("receiveHistorySearch")?.value || "",
-          document.getElementById("receiveHistorySupplierFilter")?.value || "",
-          document.getElementById("receiveHistoryDateFrom")?.value || "",
-          document.getElementById("receiveHistoryDateTo")?.value || ""
-        );
-        break;
-      case "reports":
-        ReportComponent.renderMonthlyReport();
-        break;
-    }
-    Helpers.updateStats();
-    if(StockComponent.updateReorderCount) StockComponent.updateReorderCount();
   },
   
   loadTabContent() {
@@ -121,15 +31,9 @@ let App = {
         this.onTabChange();
       });
     });
-    
-    // ปุ่มรีเฟรช
-    const refreshBtn = document.getElementById("forceRefreshBtn");
-    if(refreshBtn) {
-      refreshBtn.addEventListener("click", () => this.forceRefresh());
-    }
   },
   
-  async onTabChange() {
+  onTabChange() {
     Helpers.updateStats();
     Helpers.updateProductSelects();
     
@@ -296,6 +200,7 @@ let App = {
           let newExportBtn = exportHistoryExcelBtn.cloneNode(true);
           exportHistoryExcelBtn.parentNode.replaceChild(newExportBtn, exportHistoryExcelBtn);
           newExportBtn.addEventListener("click", () => {
+            console.log("Click Export Movement");
             MovementComponent.exportToExcel();
           });
         }
@@ -469,6 +374,7 @@ let App = {
           let newExportBtn = exportReturnHistoryExcelBtn.cloneNode(true);
           exportReturnHistoryExcelBtn.parentNode.replaceChild(newExportBtn, exportReturnHistoryExcelBtn);
           newExportBtn.addEventListener("click", () => {
+            console.log("Click Export Return");
             ReturnComponent.exportToExcel();
           });
         }
@@ -597,30 +503,158 @@ let App = {
           let newExportBtn = exportReceiveHistoryExcelBtn.cloneNode(true);
           exportReceiveHistoryExcelBtn.parentNode.replaceChild(newExportBtn, exportReceiveHistoryExcelBtn);
           newExportBtn.addEventListener("click", () => {
+            console.log("Click Export Receive");
             ReceiveComponent.exportToExcel();
           });
         }
         break;
         
       case "reports":
-        ReportComponent.renderMonthlyReport();
+        // ========== ส่วนรายงานสินค้า ==========
         
-        let monthPicker = document.getElementById("monthReportPicker");
-        if(monthPicker) {
-          let newMonthPicker = monthPicker.cloneNode(true);
-          monthPicker.parentNode.replaceChild(newMonthPicker, monthPicker);
-          newMonthPicker.addEventListener("change", () => ReportComponent.renderMonthlyReport());
+        // ค้นหาสินค้า
+        let reportProductInput = document.getElementById("reportProductInput");
+        let reportDropdownList = document.getElementById("reportDropdownList");
+        if(reportProductInput) {
+            let newReportProductInput = reportProductInput.cloneNode(true);
+            reportProductInput.parentNode.replaceChild(newReportProductInput, reportProductInput);
+            newReportProductInput.addEventListener("input", (e) => {
+                ReportComponent.updateReportDropdownList(e.target.value);
+            });
         }
         
-        let exportBtn = document.getElementById("exportMonthCSV");
-        if(exportBtn) {
-          let newExportBtn = exportBtn.cloneNode(true);
-          exportBtn.parentNode.replaceChild(newExportBtn, exportBtn);
-          newExportBtn.addEventListener("click", () => ReportComponent.exportMonthCSV());
+        document.addEventListener("click", (e) => {
+            if(reportDropdownList && reportProductInput && !reportDropdownList.contains(e.target) && e.target !== reportProductInput) {
+                reportDropdownList.style.display = "none";
+            }
+        });
+        
+        // ปุ่มค้นหารายงาน
+        let searchReportBtn = document.getElementById("searchReportBtn");
+        if(searchReportBtn) {
+            let newSearchBtn = searchReportBtn.cloneNode(true);
+            searchReportBtn.parentNode.replaceChild(newSearchBtn, searchReportBtn);
+            newSearchBtn.addEventListener("click", () => ReportComponent.searchReport());
         }
+        
+        // ตั้งค่าวันที่เริ่มต้น
+        let reportDateFrom = document.getElementById("reportDateFrom");
+        let reportDateTo = document.getElementById("reportDateTo");
+        if(reportDateFrom) {
+            let d = new Date();
+            d.setDate(1);
+            reportDateFrom.value = d.toISOString().slice(0,10);
+        }
+        if(reportDateTo) {
+            reportDateTo.value = Helpers.formatDate();
+        }
+        
+        // ✅ แท็บ切换 - แก้ไขให้ลบ active ออกจากทุกอันก่อนแล้วเพิ่มให้อันที่ถูกคลิก
+        let reportTabBtns = document.querySelectorAll(".report-tab-btn");
+        reportTabBtns.forEach(btn => {
+            let newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.addEventListener("click", () => {
+                // ลบ active ออกจากทุกอัน
+                document.querySelectorAll(".report-tab-btn").forEach(b => b.classList.remove("active"));
+                // เพิ่ม active ให้อันที่ถูกคลิก
+                newBtn.classList.add("active");
+                ReportComponent.currentTabType = newBtn.getAttribute("data-type");
+                ReportComponent.searchReport();
+            });
+        });
+        
+        // ปุ่มส่งออก Excel รายงานสินค้า
+        let exportReportExcelBtn = document.getElementById("exportReportExcelBtn");
+        if(exportReportExcelBtn) {
+            let newExportBtn = exportReportExcelBtn.cloneNode(true);
+            exportReportExcelBtn.parentNode.replaceChild(newExportBtn, exportReportExcelBtn);
+            newExportBtn.addEventListener("click", () => ReportComponent.exportToExcel());
+        }
+        
+        // ========== ส่วนความถี่การใช้งาน ==========
+        
+        // ตั้งค่าวันที่เริ่มต้นความถี่
+        let frequencyDateFrom = document.getElementById("frequencyDateFrom");
+        let frequencyDateTo = document.getElementById("frequencyDateTo");
+        if(frequencyDateFrom) {
+            let d = new Date();
+            d.setDate(1);
+            frequencyDateFrom.value = d.toISOString().slice(0,10);
+        }
+        if(frequencyDateTo) {
+            frequencyDateTo.value = Helpers.formatDate();
+        }
+        
+        // ปุ่มค้นหาความถี่
+        let searchFrequencyBtn = document.getElementById("searchFrequencyBtn");
+        if(searchFrequencyBtn) {
+            let newSearchFreqBtn = searchFrequencyBtn.cloneNode(true);
+            searchFrequencyBtn.parentNode.replaceChild(newSearchFreqBtn, searchFrequencyBtn);
+            newSearchFreqBtn.addEventListener("click", () => {
+                ReportComponent.renderFrequency(
+                    document.getElementById("frequencyDateFrom")?.value || "",
+                    document.getElementById("frequencyDateTo")?.value || ""
+                );
+            });
+        }
+        
+        // ปุ่มรีเซ็ตความถี่
+        let resetFrequencyBtn = document.getElementById("resetFrequencyBtn");
+        if(resetFrequencyBtn) {
+            let newResetFreqBtn = resetFrequencyBtn.cloneNode(true);
+            resetFrequencyBtn.parentNode.replaceChild(newResetFreqBtn, resetFrequencyBtn);
+            newResetFreqBtn.addEventListener("click", () => {
+                document.getElementById("frequencyDateFrom").value = "";
+                document.getElementById("frequencyDateTo").value = "";
+                document.getElementById("frequencyResult").innerHTML = '<div style="text-align:center; padding:40px; color:#999;">กรุณาเลือกช่วงวันที่แล้วกด "ดูความถี่"</div>';
+            });
+        }
+        
+        // โหลดความถี่เริ่มต้น (เดือนปัจจุบัน)
+        let now = new Date();
+        let startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        let endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        ReportComponent.renderFrequency(
+            startOfMonth.toISOString().slice(0,10),
+            endOfMonth.toISOString().slice(0,10)
+        );
+        
+        // ========== Decision Helper ==========
+        
+        // ปุ่มวิเคราะห์ Decision Helper
+        let searchDecisionBtn = document.getElementById("searchDecisionBtn");
+        if(searchDecisionBtn) {
+            let newDecisionBtn = searchDecisionBtn.cloneNode(true);
+            searchDecisionBtn.parentNode.replaceChild(newDecisionBtn, searchDecisionBtn);
+            newDecisionBtn.addEventListener("click", () => {
+                let fromDate = document.getElementById("decisionDateFrom").value;
+                let toDate = document.getElementById("decisionDateTo").value;
+                ReportComponent.analyzeDecision(fromDate, toDate);
+            });
+        }
+        
+        // ตั้งค่าวันที่เริ่มต้น Decision Helper
+        let decisionDateFrom = document.getElementById("decisionDateFrom");
+        let decisionDateTo = document.getElementById("decisionDateTo");
+        if(decisionDateFrom) {
+            let d = new Date();
+            d.setDate(1);
+            decisionDateFrom.value = d.toISOString().slice(0,10);
+        }
+        if(decisionDateTo) {
+            decisionDateTo.value = Helpers.formatDate();
+        }
+        
+        // โหลด Decision Helper เริ่มต้น
+        ReportComponent.analyzeDecision(
+            decisionDateFrom?.value || "",
+            decisionDateTo?.value || ""
+        );
         break;
     }
   }
 };
 
+// เริ่มต้นแอปเมื่อโหลดหน้าเสร็จ
 document.addEventListener("DOMContentLoaded", () => App.init());
