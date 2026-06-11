@@ -16,7 +16,7 @@ const MovementComponent = {
                 <div id="movementDropdownList" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:16px; max-height:250px; overflow-y:auto; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-top:5px;">
                 </div>
               </div>
-              <div class="form-group"><label>จำนวน</label><input type="number" id="movementQty" min="1" value="1"></div>
+              <div class="form-group"><label>จำนวนจ่าย</label><input type="number" id="movementQty" min="1" value="1"></div>
               <div class="form-group"><label>ประเภท</label><select id="movementType">
                 <option value="anniversary">🎉 ชุดครบปี</option>
                 <option value="probation">📋 ชุดผ่านทดลองงาน</option>
@@ -35,7 +35,7 @@ const MovementComponent = {
                 <div id="movementDeptDropdownList" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:16px; max-height:200px; overflow-y:auto; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-top:5px;">
                 </div>
               </div>
-              <div class="form-group"><label>ส่วนงาน</label><input type="text" id="movementNote" placeholder="ส่วนงานที่เบิก"></div>
+              <div class="form-group"><label>ส่วนงานที่เบิก</label><input type="text" id="movementNote" placeholder="ส่วนงานที่เบิก"></div>
               <div class="form-group" style="flex: 0.5;"><button id="recordMovementBtn" class="btn btn-primary" style="margin-top: 24px;"><i class="fas fa-check-circle"></i> บันทึก</button></div>
             </div>
             <div id="selectedProductDisplay" style="margin-top: 12px; font-size:0.85rem; color:#1e4a6e; background:#eef2ff; padding:8px 16px; border-radius:20px; display:none;">
@@ -73,12 +73,12 @@ const MovementComponent = {
                   <th style="width:15%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">ประเภท</th>
                   <th style="width:10%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">Itemcode</th>
                   <th style="width:20%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">สินค้า</th>
-                  <th style="width:5%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">จำนวน</th>
+                  <th style="width:5%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">จำนวนจ่าย</th>
                   <th style="width:7%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">ราคา/หน่วย</th>
                   <th style="width:7%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">มูลค่า</th>
                   <th style="width:10%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">ผู้จ่าย</th>
                   <th style="width:6%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">แผนก</th>
-                  <th style="width:10%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">ส่วนงาน</th>
+                  <th style="width:10%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">ส่วนงานที่รับ</th>
                   <th style="width:12%; text-align:center; border:1px solid #ddd; padding:8px; white-space: nowrap;">บันทึกเมื่อ</th>
                 </tr>
               </thead>
@@ -522,12 +522,12 @@ const MovementComponent = {
                 <th style="width:15%">ประเภท</th>
                 <th style="width:10%">Itemcode</th>
                 <th style="width:20%">สินค้า</th>
-                <th style="width:5%">จำนวน</th>
+                <th style="width:5%">จำนวนจ่าย</th>
                 <th style="width:7%">ราคา/หน่วย</th>
                 <th style="width:7%">มูลค่า</th>
                 <th style="width:10%">ผู้จ่าย</th>
                 <th style="width:6%">แผนก</th>
-                <th style="width:10%">ส่วนงาน</th>
+                <th style="width:10%">ส่วนงานที่รับ</th>
                 <th style="width:12%">บันทึกเมื่อ</th>
               </tr>
             </thead>
