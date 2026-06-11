@@ -426,3 +426,10 @@ tr:hover {
     transform: scale(1.02);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+#totalStockStat {
+  color: #10b981 !important;
+}
+
+#lowStockStat {
+  color: #dc2626 !important;
+}
