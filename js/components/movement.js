@@ -575,7 +575,7 @@ const MovementComponent = {
             </tfoot>
           </table>
           <div class="footer">
-            สร้างโดยระบบบริหารสต็อกองค์กร | จำนวนรายการ: ${filtered.length} รายการ
+            สร้างโดยระบบบริหารสต็อก | จำนวนรายการ: ${filtered.length} รายการ
           </div>
         </body>
         </html>
