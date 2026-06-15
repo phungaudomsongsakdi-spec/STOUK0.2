@@ -5,7 +5,7 @@ window.AppStorage = window.AppStorage || {
   returns: [],
   receives: [],
   
-  // ========== โหลดข้อมูลหลักจาก Firebase ==========
+  // ========== โหลดข้อมูลจาก Firebase เป็นหลัก ==========
   async loadData() {
     try {
       const db = window.db;
@@ -18,28 +18,30 @@ window.AppStorage = window.AppStorage || {
         
         if (snapshot.exists()) {
           const data = snapshot.val();
-          console.log("📦 Data from Firebase:", data);
-          
           this.products = data.products || [];
           this.movements = data.movements || [];
           this.returns = data.returns || [];
           this.receives = data.receives || [];
-          
           console.log(`✅ Loaded ${this.products.length} products from Firebase`);
           
+          // บันทึก localStorage เป็นแค่ cache
           this.saveToLocalStorage();
         } else {
-          console.log("⚠️ No data in Firebase, creating initial data...");
-          this.initProducts();
-          await this.saveData();
+          console.log("⚠️ No data in Firebase, checking localStorage...");
+          this.loadFromLocalStorage();
+          
+          if (this.products.length === 0) {
+            console.log("📦 No data at all, initializing...");
+            this.initProducts();
+            await this.saveData();
+          }
         }
       } else {
-        console.log("❌ Firebase not available, using localStorage");
+        console.log("❌ Firebase not available, using localStorage only");
         this.loadFromLocalStorage();
         
         if (this.products.length === 0) {
           this.initProducts();
-          this.saveToLocalStorage();
         }
       }
       
@@ -48,10 +50,6 @@ window.AppStorage = window.AppStorage || {
     } catch(error) {
       console.error("Error loading from Firebase:", error);
       this.loadFromLocalStorage();
-      
-      if (this.products.length === 0) {
-        this.initProducts();
-      }
     }
   },
   
@@ -113,7 +111,7 @@ window.AppStorage = window.AppStorage || {
     }
   },
   
-  // ========== รีเฟรชข้อมูลจาก Firebase ==========
+  // ========== บังคับโหลดจาก Firebase (ใช้ตอนกดปุ่มรีเฟรช) ==========
   async forceReloadFromFirebase() {
     console.log("🔄 Force reloading from Firebase...");
     const db = window.db;
@@ -136,7 +134,7 @@ window.AppStorage = window.AppStorage || {
     return false;
   },
   
-  // ========== สร้างสินค้าจาก ProductsData ==========
+  // ========== สร้างสินค้าเริ่มต้น ==========
   initProducts() {
     console.log("📦 Creating initial products from ProductsData...");
     
@@ -157,6 +155,7 @@ window.AppStorage = window.AppStorage || {
     });
     
     console.log(`✅ Created ${this.products.length} products`);
+    this.saveData();
   },
   
   // ========== อัปเดตข้อมูลเก่า ==========
