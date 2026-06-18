@@ -27,7 +27,7 @@ const StockComponent = {
           </div>
           <div class="footer-note">
             <i class="fas fa-edit"></i> คลิกดินสอเพื่อปรับจำนวนสต็อก (รับเข้า) | 
-            <i class="fas fa-bell"></i> คลิกตัวเลขรีไทม์เพื่อตั้งค่าจุดสั่งซื้อ
+            <i class="fas fa-bell"></i> คลิกตัวเลขเซฟตี้สต๊อกเพื่อตั้งค่าจุดสั่งซื้อ
           </div>
         </div>
       </div>
@@ -47,15 +47,25 @@ const StockComponent = {
     
     let html = "";
     filtered.forEach((p, idx) => {
-      let reorderPoint = (p.reorderPoint !== undefined && p.reorderPoint !== null) ? p.reorderPoint : 10;
-      let needReorder = p.quantity <= reorderPoint;
+      // ✅ ใช้ reorderPoint = 0 ถ้าไม่มีค่า
+      let reorderPoint = (p.reorderPoint !== undefined && p.reorderPoint !== null) ? p.reorderPoint : 0;
+      // ✅ เตือนเมื่อ reorderPoint > 0 และ quantity <= reorderPoint
+      let needReorder = reorderPoint > 0 && p.quantity <= reorderPoint;
       
-      // สถานะเหลือแค่ 2 แบบ
+      // สถานะ
       let statusHtml = '';
-      if(needReorder && p.quantity > 0) {
+      if(needReorder) {
         statusHtml = '<span class="badge-low" style="background:#fee2e2; color:#dc2626;">⚠️ ควรสั่งซื้อ</span>';
       } else {
         statusHtml = '<span style="color:#10b981;">✅ ปกติ</span>';
+      }
+      
+      // ✅ ไอคอนเซฟตี้สต๊อก
+      let iconDisplay = '📌';
+      if(reorderPoint > 0 && needReorder) {
+        iconDisplay = '⚠️';
+      } else if(reorderPoint > 0 && !needReorder) {
+        iconDisplay = '🔔';
       }
       
       html += `<tr>
@@ -68,7 +78,7 @@ const StockComponent = {
         <td style="white-space: nowrap; text-align:left;">${statusHtml}</td>
         <td class="reorder-cell" style="text-align:left;">
           <span class="reorder-value" data-code="${p.itemcode}" style="cursor:pointer; background:${needReorder ? '#fee2e2' : '#f1f5f9'}; padding:6px 14px; border-radius:20px; font-size:0.75rem; font-weight:600; display:inline-block;">
-            ${needReorder ? '⚠️' : '🔔'} ${reorderPoint}
+            ${iconDisplay} ${reorderPoint}
           </span>
         </td>
         <td class="action-icons" style="text-align:left;">
@@ -94,14 +104,14 @@ const StockComponent = {
       });
     });
     
-    // แก้ไข Reorder Point
+    // แก้ไข Reorder Point (เซฟตี้สต๊อก)
     document.querySelectorAll(".reorder-value").forEach(el => {
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         let code = el.getAttribute("data-code");
         let product = AppStorage.products.find(p => p.itemcode === code);
-        let currentValue = product.reorderPoint !== undefined ? product.reorderPoint : 10;
-        let newValue = prompt("ตั้งค่ารีไทม์สั่งซื้อ (จำนวนขั้นต่ำที่แจ้งเตือน):", currentValue);
+        let currentValue = product.reorderPoint !== undefined ? product.reorderPoint : 0;
+        let newValue = prompt("ตั้งค่าเซฟตี้สต๊อก (จำนวนขั้นต่ำที่แจ้งเตือน):", currentValue);
         if(newValue !== null && !isNaN(parseInt(newValue)) && parseInt(newValue) >= 0) {
           product.reorderPoint = parseInt(newValue);
           AppStorage.saveData();
@@ -117,7 +127,11 @@ const StockComponent = {
   
   updateReorderCount() {
     const products = AppStorage.products;
-    let reorderCount = products.filter(p => p.quantity <= (p.reorderPoint || 10)).length;
+    // ✅ นับเฉพาะที่ reorderPoint > 0 และ quantity <= reorderPoint
+    let reorderCount = products.filter(p => {
+      let reorderPoint = (p.reorderPoint !== undefined && p.reorderPoint !== null) ? p.reorderPoint : 0;
+      return reorderPoint > 0 && p.quantity <= reorderPoint;
+    }).length;
     let lowStockStat = document.getElementById("lowStockStat");
     if(lowStockStat) {
       lowStockStat.innerText = reorderCount;
